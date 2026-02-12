@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-FHIR Quality Inspector - Main Application
+FHIRLint - Main Application
 Desktop application for validating FHIR bundles against MII standards
 """
 import tkinter as tk
@@ -11,6 +11,7 @@ import json
 from pathlib import Path
 from typing import List
 import threading
+import webbrowser
 
 from validator import BundleValidator
 from quality_checker import QualityChecker
@@ -22,8 +23,25 @@ class FHIRQualityInspector:
 
     def __init__(self, root):
         self.root = root
-        self.root.title("FHIR Quality Inspector - MII Kerndatensatz Validator")
-        self.root.geometry("1000x700")
+        self.root.title("FHIRLint - MII Kerndatensatz Validator")
+        self.root.geometry("1100x750")
+
+        # Warm sepia color scheme
+        self.colors = {
+            'bg': '#F5E6D3',           # Warm cream background
+            'header_bg': '#8B7355',     # Rich brown header
+            'header_fg': '#FFF8DC',     # Cornsilk text
+            'control_bg': '#E8D4B8',    # Light tan
+            'results_bg': '#FFF9E6',    # Pale yellow (easier to read)
+            'text': '#3E2723',          # Dark brown text
+            'accent': '#A0826D',        # Medium brown accent
+            'success': '#6B8E23',       # Olive green
+            'error': '#8B4513',         # Saddle brown
+            'warning': '#CD853F',       # Peru
+        }
+
+        # Configure root background
+        self.root.configure(bg=self.colors['bg'])
 
         # Initialize components
         self.validator = BundleValidator()
@@ -33,53 +51,86 @@ class FHIRQualityInspector:
         # Results storage
         self.results = []
         self.processing = False
+        self.last_html_report = None  # Track last generated report
 
         # Build UI
         self._build_ui()
 
     def _build_ui(self):
         """Build the user interface"""
-        # Header
-        header_frame = ttk.Frame(self.root, padding="10")
+        # Header with warm sepia background
+        header_frame = tk.Frame(self.root, bg=self.colors['header_bg'], padx=20, pady=15)
         header_frame.pack(fill=tk.X)
 
-        title = ttk.Label(
+        title = tk.Label(
             header_frame,
-            text="🏥 FHIR Quality Inspector",
-            font=("Arial", 18, "bold")
+            text="🏥 FHIRLint",
+            font=("Georgia", 22, "bold"),
+            bg=self.colors['header_bg'],
+            fg=self.colors['header_fg']
         )
         title.pack(side=tk.LEFT)
 
-        subtitle = ttk.Label(
+        subtitle = tk.Label(
             header_frame,
             text="MII Kerndatensatz Validation & Quality Analysis",
-            font=("Arial", 10)
+            font=("Georgia", 11),
+            bg=self.colors['header_bg'],
+            fg=self.colors['header_fg']
         )
         subtitle.pack(side=tk.LEFT, padx=20)
 
-        # Control panel
-        control_frame = ttk.Frame(self.root, padding="10")
+        # Control panel with warm background
+        control_frame = tk.Frame(self.root, bg=self.colors['control_bg'], padx=15, pady=15)
         control_frame.pack(fill=tk.X)
 
         # File selection
-        ttk.Label(control_frame, text="Select FHIR Bundles:", font=("Arial", 10, "bold")).grid(
-            row=0, column=0, sticky=tk.W, pady=5
-        )
+        tk.Label(
+            control_frame,
+            text="Select FHIR Bundles:",
+            font=("Georgia", 12, "bold"),
+            bg=self.colors['control_bg'],
+            fg=self.colors['text']
+        ).grid(row=0, column=0, sticky=tk.W, pady=5)
 
         self.path_var = tk.StringVar(value="No files selected")
-        path_label = ttk.Label(control_frame, textvariable=self.path_var, foreground="gray")
+        path_label = tk.Label(
+            control_frame,
+            textvariable=self.path_var,
+            font=("Georgia", 10, "italic"),
+            bg=self.colors['control_bg'],
+            fg=self.colors['accent']
+        )
         path_label.grid(row=1, column=0, columnspan=2, sticky=tk.W, pady=5)
 
-        btn_frame = ttk.Frame(control_frame)
+        btn_frame = tk.Frame(control_frame, bg=self.colors['control_bg'])
         btn_frame.grid(row=2, column=0, columnspan=3, pady=10)
 
-        ttk.Button(btn_frame, text="Select Files...", command=self._select_files).pack(side=tk.LEFT, padx=5)
-        ttk.Button(btn_frame, text="Select Folder...", command=self._select_folder).pack(side=tk.LEFT, padx=5)
-        self.process_btn = ttk.Button(
-            btn_frame, text="▶ Process Bundles", command=self._process_bundles, style="Accent.TButton"
+        # Custom button styling
+        btn_config = {
+            'font': ('Georgia', 11),
+            'bg': self.colors['accent'],
+            'fg': self.colors['text'],              # Dark brown text
+            'activebackground': self.colors['header_bg'],
+            'activeforeground': self.colors['text'], # Dark brown when clicked
+            'relief': tk.RAISED,
+            'bd': 2,
+            'padx': 12,
+            'pady': 6
+        }
+
+        tk.Button(btn_frame, text="📁 Select Files...", command=self._select_files, **btn_config).pack(side=tk.LEFT, padx=5)
+        tk.Button(btn_frame, text="📂 Select Folder...", command=self._select_folder, **btn_config).pack(side=tk.LEFT, padx=5)
+
+        process_btn_config = btn_config.copy()
+        process_btn_config.update({'bg': self.colors['header_bg'], 'font': ('Georgia', 11, 'bold')})
+        self.process_btn = tk.Button(
+            btn_frame, text="▶ Process Bundles", command=self._process_bundles, **process_btn_config
         )
         self.process_btn.pack(side=tk.LEFT, padx=5)
-        ttk.Button(btn_frame, text="📄 Export Report", command=self._export_report).pack(side=tk.LEFT, padx=5)
+
+        tk.Button(btn_frame, text="📄 Export Report", command=self._export_report, **btn_config).pack(side=tk.LEFT, padx=5)
+        tk.Button(btn_frame, text="🌐 View Report", command=self._open_last_report, **btn_config).pack(side=tk.LEFT, padx=5)
 
         # Progress bar
         self.progress_var = tk.DoubleVar()
@@ -89,30 +140,46 @@ class FHIRQualityInspector:
         self.progress.grid(row=3, column=0, columnspan=3, sticky=(tk.W, tk.E), pady=5)
 
         self.status_var = tk.StringVar(value="Ready to process bundles")
-        status_label = ttk.Label(control_frame, textvariable=self.status_var, foreground="blue")
+        status_label = tk.Label(
+            control_frame,
+            textvariable=self.status_var,
+            font=("Georgia", 10),
+            bg=self.colors['control_bg'],
+            fg=self.colors['header_bg']
+        )
         status_label.grid(row=4, column=0, columnspan=3, sticky=tk.W)
 
-        # Results area
-        results_frame = ttk.Frame(self.root, padding="10")
+        # Results area with warm background
+        results_frame = tk.Frame(self.root, bg=self.colors['bg'], padx=15, pady=10)
         results_frame.pack(fill=tk.BOTH, expand=True)
 
-        ttk.Label(results_frame, text="Results:", font=("Arial", 10, "bold")).pack(anchor=tk.W)
+        tk.Label(
+            results_frame,
+            text="Validation Results:",
+            font=("Georgia", 12, "bold"),
+            bg=self.colors['bg'],
+            fg=self.colors['text']
+        ).pack(anchor=tk.W)
 
-        # Results text area with scrollbar
+        # Results text area with larger, more readable font
         self.results_text = scrolledtext.ScrolledText(
             results_frame,
             wrap=tk.WORD,
-            font=("Courier", 9),
-            bg="#f5f5f5"
+            font=("Consolas", 14),  # Larger font size for readability
+            bg=self.colors['results_bg'],
+            fg=self.colors['text'],
+            insertbackground=self.colors['text'],
+            relief=tk.SUNKEN,
+            bd=2
         )
         self.results_text.pack(fill=tk.BOTH, expand=True, pady=5)
 
-        # Configure text tags for colors
-        self.results_text.tag_config("header", foreground="#2563eb", font=("Courier", 10, "bold"))
-        self.results_text.tag_config("success", foreground="#16a34a")
-        self.results_text.tag_config("error", foreground="#dc2626")
-        self.results_text.tag_config("warning", foreground="#ea580c")
-        self.results_text.tag_config("info", foreground="#6b7280")
+        # Configure text tags for warm sepia colors
+        self.results_text.tag_config("header", foreground=self.colors['header_bg'], font=("Consolas", 15, "bold"))
+        self.results_text.tag_config("success", foreground=self.colors['success'])
+        self.results_text.tag_config("error", foreground=self.colors['error'])
+        self.results_text.tag_config("warning", foreground=self.colors['warning'])
+        self.results_text.tag_config("info", foreground=self.colors['accent'])
 
         # Selected files
         self.selected_files = []
@@ -261,9 +328,24 @@ class FHIRQualityInspector:
         # Generate reports
         html_file, json_file = self.report_generator.generate_reports(self.results, output_dir)
 
+        # Save the HTML file path for later viewing
+        self.last_html_report = html_file
+
         self._log(f"✓ HTML report: {html_file}", "success")
         self._log(f"✓ JSON report: {json_file}", "success")
         self._log(f"\n✓ Reports generated successfully!", "success")
+
+        # Auto-open the HTML report in default browser
+        self._log(f"🌐 Opening report in browser...", "info")
+        webbrowser.open('file://' + html_file)
+
+    def _open_last_report(self):
+        """Open the most recently generated HTML report in browser"""
+        if self.last_html_report and os.path.exists(self.last_html_report):
+            self._log(f"🌐 Opening report: {self.last_html_report}", "info")
+            webbrowser.open('file://' + self.last_html_report)
+        else:
+            self._log("⚠ No report available. Please export a report first!", "warning")
 
     def _log(self, message: str, tag: str = ""):
         """Log message to results area"""
