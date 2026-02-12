@@ -290,10 +290,7 @@ Created as a rapid prototype to demonstrate:
 - FHIR expertise
 - Healthcare data quality analysis
 - German healthcare context knowledge (MII, ICD-10-GM)
-- Rapid prototyping skills
 - Clean, maintainable code
-
-**Built in one weekend** for a job application to demonstrate technical competency.
 
 ---
 
