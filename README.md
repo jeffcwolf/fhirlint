@@ -1,5 +1,7 @@
 # 🏥 FHIRLint
 
+[![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.18663649.svg)](https://doi.org/10.5281/zenodo.18663649)
+
 **Cross-platform desktop application (Python + tkinter) for validating and analyzing FHIR bundles against MII Kerndatensatz standards**
 
 A rapid prototype demonstrating FHIR data validation expertise and healthcare data quality analysis capabilities.
