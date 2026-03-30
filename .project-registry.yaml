@@ -1,0 +1,58 @@
+name: fhirlint
+description: "A desktop application for validating and analysing FHIR bundles against German MII Kerndatensatz standards, with batch processing and HTML report export."
+status: stable
+category: desktop-app
+language: python
+forge: github
+visibility: public
+tags: [fhir, healthcare, data-quality, mii, german-healthcare]
+notes: "Rapid prototype demonstrating FHIR validation expertise and German healthcare context (MII, ICD-10-GM). Not intended for production use."
+created: ""
+last_touched: ""
+# ── Website publication (functionsandfolios.com) ──────────────────────────────
+website:
+  publish: true
+  slug: fhirlint
+  order: 99
+  category: "Open-Source Tools"
+  audience: "Clinical data integration teams and researchers working with German MII FHIR data"
+  platform: [macOS, Windows, Linux]
+  license: MIT
+  internal_url: "/digital-projects/fhirlint"
+  video_url: ""
+  download_url: "https://github.com/jeffcwolf/fhirlint"
+  screenshots: []
+  doi: "10.5281/zenodo.18663649"
+  description_long: |
+    FHIRLint is a cross-platform desktop application for validating and
+    analysing FHIR bundles against the Medizininformatik-Initiative (MII)
+    Kerndatensatz standards used in German university hospitals.
+
+    Built as a rapid prototype to demonstrate FHIR expertise and healthcare
+    data quality analysis, it processes thousands of bundles efficiently
+    with a GUI interface and exports professional HTML and JSON reports.
+
+    ## Key Features
+
+    - **FHIR bundle validation** — parses and validates FHIR Bundle resources
+      against MII Kerndatensatz profiles
+    - **MII profile detection** — automatically identifies MII modules:
+      Person, Fall, Diagnose, and Medikation
+    - **38+ quality checks** — required field validation, date format
+      checking, ICD-10-GM code format, reference integrity, and German
+      postal code validation
+    - **Batch processing** — handles thousands of bundles efficiently with
+      real-time progress display
+    - **Report export** — generates HTML and JSON reports that auto-open
+      in the browser on completion
+
+    ## Tested On
+
+    1,651 real POLAR FHIR bundles from an MII use case, achieving 100%
+    validation pass rate with all MII modules detected.
+
+    ## Status
+
+    Stable prototype. Published with a DOI via Zenodo. Not intended for
+    production use — see the README for planned V2 enhancements including
+    full StructureDefinition validation and CLI mode.
