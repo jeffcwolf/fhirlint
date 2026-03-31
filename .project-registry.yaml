@@ -1,9 +1,9 @@
-name: fhirlint
+name: FHIRlint
 description: "A desktop application for validating and analysing FHIR bundles against German MII Kerndatensatz standards, with batch processing and HTML report export."
 status: stable
 category: desktop-app
 language: python
-forge: github
+forge: multiple
 visibility: public
 tags: [fhir, healthcare, data-quality, mii, german-healthcare]
 notes: "Rapid prototype demonstrating FHIR validation expertise and German healthcare context (MII, ICD-10-GM). Not intended for production use."
@@ -14,21 +14,21 @@ website:
   publish: true
   slug: fhirlint
   order: 99
-  category: "Open-Source Tools"
+  category: "Desktop Applications"
   audience: "Clinical data integration teams and researchers working with German MII FHIR data"
   platform: [macOS, Windows, Linux]
-  license: MIT
+  license: Apache 2.0
   internal_url: "/digital-projects/fhirlint"
   video_url: ""
   download_url: "https://github.com/jeffcwolf/fhirlint"
   screenshots: []
   doi: "10.5281/zenodo.18663649"
+  codeberg_url: "https://codeberg.org/research_coder/fhirlint"
   description_long: |
-    FHIRLint is a cross-platform desktop application for validating and
-    analysing FHIR bundles against the Medizininformatik-Initiative (MII)
+    FHIRLint is for validating and analysing FHIR bundles against the Medizininformatik-Initiative (MII)
     Kerndatensatz standards used in German university hospitals.
 
-    Built as a rapid prototype to demonstrate FHIR expertise and healthcare
+    Built as a rapid prototype to demonstrate FHIR knowledge and healthcare
     data quality analysis, it processes thousands of bundles efficiently
     with a GUI interface and exports professional HTML and JSON reports.
 
